@@ -1,4 +1,4 @@
-package com.zadanie_rekrutacyjne_github.config;
+package com.zadanie_rekrutacyjne_github;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -1,14 +1,11 @@
-package com.zadanie_rekrutacyjne_github.service;
+package com.zadanie_rekrutacyjne_github;
 
-import com.zadanie_rekrutacyjne_github.proxy.GithubProxy;
-import com.zadanie_rekrutacyjne_github.proxy.OwnerRepository;
-import com.zadanie_rekrutacyjne_github.proxy.RepositoryInfo;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-public class GithubService {
+class GithubService {
 
     private final GithubProxy githubProxy;
 
@@ -16,7 +13,7 @@ public class GithubService {
         this.githubProxy = githubProxy;
     }
 
-    public List<ReposWithAllBranch> retrieveUserRepositoriesWithBranches(String username) {
+    List<ReposWithAllBranch> retrieveUserRepositoriesWithBranches(final String username) {
         List<OwnerRepository> ownerRepositories = githubProxy.retrieveAllRepos(username);
 
         return ownerRepositories.stream()

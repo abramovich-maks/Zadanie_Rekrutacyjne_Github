@@ -1,7 +1,5 @@
-package com.zadanie_rekrutacyjne_github.controller;
+package com.zadanie_rekrutacyjne_github;
 
-import com.zadanie_rekrutacyjne_github.service.GithubService;
-import com.zadanie_rekrutacyjne_github.service.ReposWithAllBranch;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,12 +14,12 @@ class GithubController {
 
     private final GithubService githubService;
 
-    public GithubController(GithubService githubService) {
+    GithubController(GithubService githubService) {
         this.githubService = githubService;
     }
 
     @GetMapping("/{username}/repos")
-    public ResponseEntity<List<ReposWithAllBranch>> listRepos(@PathVariable("username") String username) {
+    ResponseEntity<List<ReposWithAllBranch>> listRepos(@PathVariable("username") final String username) {
         return ResponseEntity.ok(githubService.retrieveUserRepositoriesWithBranches(username));
     }
 }

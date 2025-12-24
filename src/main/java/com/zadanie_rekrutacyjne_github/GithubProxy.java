@@ -1,6 +1,5 @@
-package com.zadanie_rekrutacyjne_github.proxy;
+package com.zadanie_rekrutacyjne_github;
 
-import com.zadanie_rekrutacyjne_github.error.UserNotFoundException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -17,27 +16,26 @@ import java.util.List;
 
 @Component
 @Log4j2
-public class GithubProxy {
+class GithubProxy {
 
     private final RestTemplate restTemplate;
 
-    public GithubProxy(RestTemplate restTemplate) {
+    GithubProxy(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
 
     @Value("${github.service.url}")
-    String url;
+    private String url;
 
     @Value("${github.token}")
-    String token;
+    private String token;
 
-    public List<OwnerRepository> retrieveAllRepos(String user) {
-        String uri = UriComponentsBuilder
-                .newInstance()
-                .scheme("https")
-                .host(url)
-                .path("/users/" + user + "/repos")
-                .build().toUriString();
+
+    List<OwnerRepository> retrieveAllRepos(String user) {
+        String uri = UriComponentsBuilder.fromUriString(url)
+                .path("/users/{user}/repos")
+                .buildAndExpand(user)
+                .toUriString();
 
         try {
             ResponseEntity<OwnerRepository[]> response = restTemplate.exchange(
@@ -57,13 +55,11 @@ public class GithubProxy {
         }
     }
 
-    public List<RepositoryInfo> retrieveAllBranchByReposName(String userName, String repoName) {
-        String uri = UriComponentsBuilder
-                .newInstance()
-                .scheme("https")
-                .host(url)
-                .path("/repos/" + userName + "/" + repoName + "/branches")
-                .build().toUriString();
+    List<RepositoryInfo> retrieveAllBranchByReposName(String userName, String repoName) {
+        String uri = UriComponentsBuilder.fromUriString(url)
+                .path("/repos/{userName}/{reposName}/branches")
+                .buildAndExpand(userName, repoName)
+                .toUriString();
 
         ResponseEntity<RepositoryInfo[]> response = restTemplate.exchange(
                 uri,

@@ -1,4 +1,4 @@
-package com.zadanie_rekrutacyjne_github.error;
+package com.zadanie_rekrutacyjne_github;
 
 import org.springframework.http.HttpStatus;
 

@@ -1,9 +1,9 @@
-package com.zadanie_rekrutacyjne_github.proxy;
+package com.zadanie_rekrutacyjne_github;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record RepositoryInfo(
+record RepositoryInfo(
         String name,
         Commit commit
 ) {
