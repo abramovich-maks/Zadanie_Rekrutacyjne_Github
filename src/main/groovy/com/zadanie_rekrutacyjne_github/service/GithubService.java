@@ -16,7 +16,7 @@ public class GithubService {
         this.githubProxy = githubProxy;
     }
 
-    public List<ReposWithAllBranch> f(String username) {
+    public List<ReposWithAllBranch> retrieveUserRepositoriesWithBranches(String username) {
         List<OwnerRepository> ownerRepositories = githubProxy.retrieveAllRepos(username);
 
         return ownerRepositories.stream()

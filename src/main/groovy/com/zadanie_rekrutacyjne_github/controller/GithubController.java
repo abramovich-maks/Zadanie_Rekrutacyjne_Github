@@ -22,6 +22,6 @@ class GithubController {
 
     @GetMapping("/{username}/repos")
     public ResponseEntity<List<ReposWithAllBranch>> listRepos(@PathVariable("username") String username) {
-        return ResponseEntity.ok(githubService.f(username));
+        return ResponseEntity.ok(githubService.retrieveUserRepositoriesWithBranches(username));
     }
 }
