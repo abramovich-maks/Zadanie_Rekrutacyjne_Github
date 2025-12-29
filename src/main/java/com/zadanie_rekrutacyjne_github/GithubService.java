@@ -18,6 +18,7 @@ class GithubService {
 
         return ownerRepositories.stream()
                 .filter(repo -> !repo.fork())
+                .parallel()
                 .map(repo -> {
                     String repoName = repo.name();
                     String owner = repo.owner().login();

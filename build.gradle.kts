@@ -32,6 +32,7 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
     testImplementation("org.wiremock:wiremock-standalone:3.3.1")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation("org.apache.commons:commons-lang3:3.14.0")
 }
 
 tasks.withType<Test> {

@@ -2,6 +2,7 @@ package com.zadanie_rekrutacyjne_github;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
+import org.apache.commons.lang3.time.StopWatch;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -17,8 +18,11 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -55,6 +59,7 @@ class GithubIntegrationTest {
                 .willReturn(WireMock.aResponse()
                         .withStatus(HttpStatus.OK.value())
                         .withHeader("Content-Type", "application/json")
+                        .withFixedDelay(1000)
                         .withBody("""
                                 [
                                   {
@@ -79,6 +84,7 @@ class GithubIntegrationTest {
                 .willReturn(aResponse()
                         .withStatus(HttpStatus.OK.value())
                         .withHeader("Content-Type", "application/json")
+                        .withFixedDelay(1000)
                         .withBody("""
                                 [
                                   {
@@ -92,6 +98,7 @@ class GithubIntegrationTest {
                 .willReturn(aResponse()
                         .withStatus(HttpStatus.OK.value())
                         .withHeader("Content-Type", "application/json")
+                        .withFixedDelay(1000)
                         .withBody("""
                                 [
                                   {
@@ -124,5 +131,72 @@ class GithubIntegrationTest {
                 .andExpect(jsonPath("$.status").value("404 NOT_FOUND"))
                 .andExpect(jsonPath("$.message").exists());
 
+    }
+
+    @Test
+    void should_fetch_branches_in_parallel_and_finish_in_around_2_seconds() throws Exception {
+        wireMockServer.stubFor(WireMock.get(urlEqualTo("/users/abramovich-maks/repos"))
+                .willReturn(WireMock.aResponse()
+                        .withStatus(HttpStatus.OK.value())
+                        .withHeader("Content-Type", "application/json")
+                        .withFixedDelay(1000)
+                        .withBody("""
+                                [
+                                  {
+                                    "name": "Lotto",
+                                    "owner": { "login": "abramovich-maks" },
+                                    "fork": false
+                                  },
+                                  {
+                                    "name": "JobOffers",
+                                    "owner": { "login": "abramovich-maks" },
+                                    "fork": false
+                                  },
+                                  {
+                                    "name": "ThisIsFork",
+                                    "owner": { "login": "abramovich-maks" },
+                                    "fork": true
+                                  }
+                                ]
+                                """)));
+        wireMockServer.stubFor(WireMock.get(urlEqualTo("/repos/abramovich-maks/Lotto/branches"))
+                .willReturn(aResponse()
+                        .withStatus(HttpStatus.OK.value())
+                        .withHeader("Content-Type", "application/json")
+                        .withFixedDelay(1000)
+                        .withBody("""
+                                [
+                                  {
+                                    "name": "main",
+                                    "commit": { "sha": "12345" }
+                                  }
+                                ]
+                                """)));
+
+        wireMockServer.stubFor(WireMock.get(urlEqualTo("/repos/abramovich-maks/JobOffers/branches"))
+                .willReturn(aResponse()
+                        .withStatus(HttpStatus.OK.value())
+                        .withHeader("Content-Type", "application/json")
+                        .withFixedDelay(1000)
+                        .withBody("""
+                                [
+                                  {
+                                    "name": "main",
+                                    "commit": { "sha": "12345" }
+                                  }
+                                ]
+                                """)));
+
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
+
+        mockMvc.perform(get("/api/github/abramovich-maks/repos")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        stopWatch.stop();
+        long totalTimeMs = stopWatch.getTime();
+        wireMockServer.verify(3, getRequestedFor(urlMatching(".*")));
+        assertThat(totalTimeMs).isBetween(2000L, 2500L);
     }
 }
